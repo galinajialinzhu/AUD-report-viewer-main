@@ -1,0 +1,209 @@
+@import "tailwindcss";
+
+/* Charter 大标题字体（CDN） */
+@font-face {
+  font-family: "Charter";
+  src: url("https://cdn.jsdelivr.net/npm/charter-webfont@4.1.0/fonts/charter_regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Charter";
+  src: url("https://cdn.jsdelivr.net/npm/charter-webfont@4.1.0/fonts/charter_bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme inline {
+  /* 正文、大部分文字：Montserrat（由 layout 注入 --font-montserrat） */
+  --font-sans: var(--font-montserrat), "Montserrat", system-ui, sans-serif;
+  /* 大标题：Charter */
+  --font-serif: "Charter", "Bitstream Charter", Georgia, serif;
+
+  /* Report design system — consulting-grade palette */
+  --color-report-bg: #FAFAF7;
+  --color-report-surface: #FFFFFF;
+  --color-report-surface-alt: #F5F3EF;
+  /* Card/surface fill per design spec */
+  --color-report-fill: #FEFEFF;
+  --color-report-border: #D9D6D0;
+  --color-report-border-light: #EAEAE6;
+  /* Stroke: solid black for card borders */
+  --color-report-stroke: #000000;
+  --color-report-text: #1A1A1A;
+  --color-report-text-secondary: #4A4A4A;
+  --color-report-text-tertiary: #8A8A8A;
+  --color-report-accent: #1B3A5C;
+  --color-report-accent-dark: #0F2440;
+  --color-report-accent-light: #EDF2F7;
+  --color-report-green: #15803D;
+  --color-report-green-bg: #F0FDF4;
+  --color-report-green-border: #BBF7D0;
+  --color-report-amber: #A16207;
+  --color-report-amber-bg: #FFFBEB;
+  --color-report-amber-border: #FDE68A;
+  --color-report-red: #B91C1C;
+  --color-report-red-bg: #FEF2F2;
+  --color-report-red-border: #FECACA;
+  --color-report-purple: #6366F1;
+  --color-report-purple-bg: #EEF2FF;
+  --color-report-purple-border: #C7D2FE;
+  --color-report-link: #2F68DE;
+  --color-icon-stroke: #2F68DE;
+  --color-icon-fill: #E9F2FE;
+
+  /* Drop shadow colors (design spec) */
+  --shadow-report-blue: #6F9AED;
+  --shadow-report-green: #86EFAC;
+  --shadow-report-purple: #DDD6FE;
+  --shadow-report-amber: #FDBA74;
+  --shadow-report-yellow: #FDE68A;
+  --shadow-report-red: #FF9191;
+
+  /* Minimum spacing (design spec: at least 15px) */
+  --spacing-report-min: 15px;
+
+  /* Typography (Montserrat) */
+  --text-h1: 30px;
+  --text-h2: 24px;
+  --text-h3: 14px;
+  --text-paragraph: 14px;
+  --text-link: 16px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background-color: #C7D7E8;
+  color: #0F2440;
+}
+
+body {
+  background: var(--color-report-bg);
+  color: var(--color-report-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---- Sidebar 100vh 占满左侧整条（不脱离布局，避免内容被挤压） ---- */
+.report-page {
+  --report-sidebar-width: 380px;
+  display: grid;
+  grid-template-columns: var(--report-sidebar-width) 1fr;
+  max-width: 1280px;
+  margin: 0 auto;
+  gap: 0;
+  width: 100%;
+  min-height: 100vh;
+  align-items: stretch;
+}
+
+.report-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  background: #EAF1FF;
+  border-right: 1px solid rgba(47, 104, 222, 0.25);
+}
+
+/* Hide sidebar on narrow screens — fall back to full scroll */
+@media (max-width: 767px) {
+  .report-page {
+    grid-template-columns: 1fr;
+    max-width: 720px;
+  }
+  .report-sidebar {
+    display: none;
+  }
+}
+
+/* Report 右侧内容区内边距，避免贴边 */
+.report-content {
+  padding-left: 1.25rem;
+  padding-right: 2rem;
+}
+@media (min-width: 768px) {
+  .report-content {
+    padding-right: 2.5rem;
+  }
+}
+
+/* Report content spacing rhythm (min 15px per design spec) */
+.report-content > * + * {
+  margin-top: max(1.25rem, var(--spacing-report-min));
+}
+
+/* Section fade-in animation */
+@keyframes sectionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.report-content > [data-section-id],
+.report-content .report-content > [data-section-id] {
+  animation: sectionFadeIn 0.3s ease-out;
+}
+
+/* Prose styles for MDX text content */
+.report-content p {
+  line-height: 1.7;
+}
+
+.report-content ul,
+.report-content ol {
+  padding-left: 1.25rem;
+  line-height: 1.7;
+}
+
+.report-content li + li {
+  margin-top: 0.25rem;
+}
+
+/* Sidebar active tab transition */
+.report-sidebar button {
+  transition: all 0.15s ease;
+}
+
+/* ---- Card design spec: fill #FEFEFF, stroke black, drop shadow ---- */
+.report-card-fill {
+  background: var(--color-report-fill);
+  border: 1px solid var(--color-report-stroke);
+  border-radius: 10px;
+}
+.report-card-shadow-blue { box-shadow: 7px 7px 0 var(--shadow-report-blue); }
+.report-card-shadow-green { box-shadow: 7px 7px 0 var(--shadow-report-green); }
+.report-card-shadow-purple { box-shadow: 7px 7px 0 var(--shadow-report-purple); }
+.report-card-shadow-amber { box-shadow: 7px 7px 0 var(--shadow-report-amber); }
+.report-card-shadow-yellow { box-shadow: 7px 7px 0 var(--shadow-report-yellow); }
+.report-card-shadow-red { box-shadow: 7px 7px 0 var(--shadow-report-red); }
+
+/* Refined scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-report-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-report-text-tertiary);
+}

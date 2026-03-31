@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>组件预览 - Report Viewer</title>
+  <style>
+    /* 导入字体 */
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:wght@400&display=swap');
+
+    /* 重置样式 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* 项目颜色系统（设计规范: Fill #FEFEFF, Stroke #000000, 6 色投影） */
+    :root {
+      --color-report-bg: #FAFAF7;
+      --color-report-surface: #FFFFFF;
+      --color-report-surface-alt: #F5F3EF;
+      --color-report-fill: #FEFEFF;
+      --color-report-stroke: #000000;
+      --color-report-border: #D9D6D0;
+      --color-report-border-light: #EAEAE6;
+      --color-report-text: #1A1A1A;
+      --color-report-text-secondary: #4A4A4A;
+      --color-report-text-tertiary: #8A8A8A;
+      --color-report-accent: #1B3A5C;
+      --color-report-accent-dark: #0F2440;
+      --color-report-accent-light: #EDF2F7;
+      --color-report-green: #15803D;
+      --color-report-green-bg: #F0FDF4;
+      --color-report-green-border: #BBF7D0;
+      --color-report-amber: #A16207;
+      --color-report-amber-bg: #FFFBEB;
+      --color-report-amber-border: #FDE68A;
+      --color-report-red: #B91C1C;
+      --color-report-red-bg: #FEF2F2;
+      --color-report-red-border: #FECACA;
+      --color-report-purple: #6366F1;
+      --color-report-purple-bg: #EEF2FF;
+      --color-report-purple-border: #C7D2FE;
+      /* Drop shadow 设计规范 */
+      --shadow-report-blue: #6F9AED;
+      --shadow-report-green: #86EFAC;
+      --shadow-report-purple: #DDD6FE;
+      --shadow-report-amber: #FDBA74;
+      --shadow-report-yellow: #FDE68A;
+      --shadow-report-red: #FF9191;
+      --spacing-report-min: 15px;
+      --font-sans: "DM Sans", system-ui, sans-serif;
+      --font-serif: "Instrument Serif", Georgia, serif;
+    }
+
+    body {
+      background: var(--color-report-bg);
+      color: var(--color-report-text);
+      font-family: var(--font-sans);
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      margin-bottom: 2rem;
+      color: var(--color-report-text);
+    }
+
+    h2 {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      color: var(--color-report-text);
+    }
+
+    .section {
+      margin-bottom: 4rem;
+    }
+
+    /* 卡片容器样式（Fill #FEFEFF, Stroke #000000） */
+    .card-container {
+      overflow: hidden;
+      border-radius: 10px;
+      border: 1px solid var(--color-report-stroke);
+      background: var(--color-report-fill);
+    }
+
+    /* 模块卡片样式（间距至少 15px） */
+    .module-card {
+      display: flex;
+      flex-direction: column;
+      height: 227px;
+      padding: max(15px, 1rem);
+      gap: max(15px, 0.625rem);
+      position: relative;
+    }
+
+    .module-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: max(var(--spacing-report-min), 1.5rem);
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .module-card-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    /* 阴影效果（设计规范 6 色） */
+    .shadow-blue {
+      box-shadow: 7px 7px 0 var(--shadow-report-blue);
+    }
+    .shadow-green {
+      box-shadow: 7px 7px 0 var(--shadow-report-green);
+    }
+    .shadow-purple {
+      box-shadow: 7px 7px 0 var(--shadow-report-purple);
+    }
+    .shadow-amber {
+      box-shadow: 7px 7px 0 var(--shadow-report-amber);
+    }
+    .shadow-yellow {
+      box-shadow: 7px 7px 0 var(--shadow-report-yellow);
+    }
+    .shadow-red {
+      box-shadow: 7px 7px 0 var(--shadow-report-red);
+    }
+
+    /* 图标容器 */
+    .icon-container {
+      width: 50px;
+      height: 50px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .icon-container.accent {
+      background: var(--color-report-accent-light);
+      color: var(--color-report-accent);
+    }
+
+    .icon-container svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* 文本样式 */
+    .text-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-report-text-tertiary);
+      margin-bottom: 0.25rem;
+    }
+
+    .text-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--color-report-text);
+      margin-bottom: 0.5rem;
+    }
+
+    .text-large-number {
+      font-family: var(--font-serif);
+      font-size: 30px;
+      font-weight: 400;
+      color: var(--color-report-text);
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+    }
+
+    .text-body {
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--color-report-text-secondary);
+    }
+
+    .text-body-secondary {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--color-report-text-secondary);
+    }
+
+    /* 操作链接 */
+    .action-link {
+      margin-top: auto;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--color-report-accent);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      transition: color 0.2s;
+    }
+
+    .action-link:hover {
+      color: var(--color-report-accent-dark);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .action-link .arrow {
+      width: 16px;
+      height: 13px;
+      transform: rotate(135deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-link .arrow svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 对比区域 */
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comparison-item {
+      padding: max(15px, 1.5rem);
+      background: var(--color-report-fill);
+      border-radius: 10px;
+      border: 1px solid var(--color-report-stroke);
+    }
+
+    .comparison-item h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--color-report-text);
+    }
+
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      margin-top: 0.5rem;
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .badge.before {
+      background: var(--color-report-red-bg);
+      color: var(--color-report-red);
+    }
+
+    .badge.after {
+      background: var(--color-report-green-bg);
+      color: var(--color-report-green);
+    }
+
+    .info-box {
+      background: var(--color-report-fill);
+      border: 1px solid var(--color-report-stroke);
+      border-radius: 10px;
+      padding: max(15px, 1.5rem);
+      margin-top: 1rem;
+    }
+
+    .info-box h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--color-report-text);
+    }
+
+    .color-swatch {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .color-swatch .swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      border: 1px solid var(--color-report-border-light);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>组件预览 - Report Viewer</h1>
+
+    <!-- Module Cards 带阴影效果 -->
+    <section class="section">
+      <h2>Module Cards - 带阴影效果的方块小卡片</h2>
+      <p class="text-body-secondary">四个模块卡片，每个都有不同颜色的阴影效果（从 Figma 设计转换）</p>
+      
+      <div class="module-card-grid">
+        <!-- Zoning Status - 绿色阴影 -->
+        <div class="card-container module-card shadow-green">
+          <div class="icon-container accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </div>
+          <p class="text-label">Zoning Status</p>
+          <div style="flex: 1;">
+            <p class="text-large-number">By-right Eligible</p>
+            <p class="text-body-secondary">R-1-8 (no Special Permit Needed)</p>
+          </div>
+          <a href="#" class="action-link" onclick="alert('View zoning status'); return false;">
+            <div class="arrow">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 12L12 4M12 4H4M12 4V12" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            view zoning status
+          </a>
+        </div>
+
+        <!-- Max ADU Size - 紫色阴影 -->
+        <div class="card-container module-card shadow-purple">
+          <div class="icon-container accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div>
+          <p class="text-label">Max ADU Size</p>
+          <div style="flex: 1;">
+            <p class="text-large-number">800 sq ft</p>
+            <p class="text-body-secondary">2 Bed / 2 Bath Possible</p>
+          </div>
+          <a href="#" class="action-link" onclick="alert('Check design options'); return false;">
+            <div class="arrow">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 12L12 4M12 4H4M12 4V12" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            check design options
+          </a>
+        </div>
+
+        <!-- Est. ROI - 琥珀色阴影 -->
+        <div class="card-container module-card shadow-amber">
+          <div class="icon-container accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="6" x2="12" y2="12"></line>
+              <line x1="16" y1="10" x2="12" y2="12"></line>
+              <path d="M12 18a6 6 0 0 0 6-6"></path>
+            </svg>
+          </div>
+          <p class="text-label">Est. ROI</p>
+          <div style="flex: 1;">
+            <p class="text-large-number">10.8%</p>
+            <p class="text-body-secondary">7.5 Years Payback Period</p>
+          </div>
+          <a href="#" class="action-link" onclick="alert('View financial analysis'); return false;">
+            <div class="arrow">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 12L12 4M12 4H4M12 4V12" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            view financial analysis
+          </a>
+        </div>
+
+        <!-- Timeline - 黄色阴影 -->
+        <div class="card-container module-card shadow-yellow">
+          <div class="icon-container accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <p class="text-label">Timeline</p>
+          <div style="flex: 1;">
+            <p class="text-large-number">8-10 Mos</p>
+            <p class="text-body-secondary">From Design to Move-in</p>
+          </div>
+          <a href="#" class="action-link" onclick="alert('See construction plan'); return false;">
+            <div class="arrow">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 12L12 4M12 4H4M12 4V12" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            see construction plan
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Utility Cards - Dashboard Small Cards -->
+    <section class="section">
+      <h2>Utility Cards - Dashboard Small Cards</h2>
+      <p class="text-body-secondary">实用工具卡片，显示 Water、Sewer、Electric 和 Solar 状态</p>
+      
+      <div style="display: flex; flex-wrap: wrap; gap: 2.25rem; width: 100%; margin-top: 1rem;">
+        <!-- Water Card -->
+        <div class="card-container module-card shadow-green" style="height: 164px; flex: 1; min-width: 200px;">
+          <div class="icon-container accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+              <path d="M12 22V12"></path>
+            </svg>
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+            <p class="text-label">Water</p>
+            <p style="font-size: 24px; font-weight: 400; color: var(--color-report-green); white-space: nowrap;">Available</p>
+          </div>
+        </div>
+
+        <!-- Sewer Card -->
+        <div class="card-container module-card shadow-purple" style="height: 164px; flex: 1; min-width: 200px;">
+          <div class="icon-container accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+            <p class="text-label">Sewer</p>
+            <p style="font-size: 24px; font-weight: 400; color: var(--color-report-green); white-space: nowrap;">Available</p>
+          </div>
+        </div>
+
+        <!-- Electric Card -->
+        <div class="card-container module-card shadow-amber" style="height: 164px; flex: 1; min-width: 200px;">
+          <div class="icon-container accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+            <p class="text-label">Electric</p>
+            <p style="font-size: 24px; font-weight: 400; color: var(--color-report-amber); white-space: nowrap;">Upgrade Likely</p>
+          </div>
+        </div>
+
+        <!-- Solar Card -->
+        <div class="card-container module-card shadow-yellow" style="height: 164px; width: 269px; flex-shrink: 0;">
+          <div style="width: 100%; height: 64px; background: var(--color-report-amber-bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; color: var(--color-report-amber);">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+            <p class="text-label">Solar</p>
+            <p style="font-size: 24px; font-weight: 400; color: var(--color-report-green); white-space: nowrap;">Recommended</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 阴影颜色说明 -->
+    <section class="section">
+      <h2>阴影效果说明</h2>
+      <div class="info-box">
+        <h3>阴影颜色映射</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+          <div class="color-swatch">
+            <div class="swatch" style="background: #86efac;"></div>
+            <div>
+              <strong>绿色阴影</strong><br>
+              <span class="text-body-secondary">#86EFAC</span>
+            </div>
+          </div>
+          <div class="color-swatch">
+            <div class="swatch" style="background: #ddd6fe;"></div>
+            <div>
+              <strong>紫色阴影</strong><br>
+              <span class="text-body-secondary">#DDD6FE</span>
+            </div>
+          </div>
+          <div class="color-swatch">
+            <div class="swatch" style="background: #fdba74;"></div>
+            <div>
+              <strong>琥珀色阴影</strong><br>
+              <span class="text-body-secondary">#FDBA74</span>
+            </div>
+          </div>
+          <div class="color-swatch">
+            <div class="swatch" style="background: #fde68a;"></div>
+            <div>
+              <strong>黄色阴影</strong><br>
+              <span class="text-body-secondary">#FDE68A</span>
+            </div>
+          </div>
+        </div>
+        <p class="text-body-secondary" style="margin-top: 1rem;">
+          阴影效果：<code>box-shadow: 7px 7px 0px [颜色]</code>
+        </p>
+      </div>
+    </section>
+
+    <!-- 转换对比 -->
+    <section class="section">
+      <h2>Figma 代码转换对比</h2>
+      
+      <div class="comparison">
+        <div class="comparison-item">
+          <h3>
+            <span class="badge before">转换前</span>
+          </h3>
+          <div class="code-block">
+import vector from "./vector.svg";
+import image from "./image.svg";
+// ... 多个 SVG 导入
+
+&lt;article className="flex flex-col 
+  h-[227px] rounded-[10px] 
+  border border-solid border-black 
+  bg-[linear-gradient(...)]
+  shadow-[7px_7px_0px_#86efac]"&gt;
+  &lt;div className="bg-[#e9f2fe]"&gt;
+    &lt;img src={vector} /&gt;
+    &lt;img src={image} /&gt;
+  &lt;/div&gt;
+  &lt;h2 className="[font-family:'Montserrat-Regular']
+    text-[#7f7f7f]"&gt;
+    Zoning Status
+  &lt;/h2&gt;
+&lt;/article&gt;
+          </div>
+          <p class="text-body-secondary" style="margin-top: 0.5rem;">
+            ❌ 硬编码颜色、字体、SVG 图片、阴影
+          </p>
+        </div>
+
+        <div class="comparison-item">
+          <h3>
+            <span class="badge after">转换后</span>
+          </h3>
+          <div class="code-block">
+import { MapPin } from "lucide-react";
+import { cardContainer, textStyles } 
+  from '@/lib/report-styles';
+
+&lt;ModuleCards 
+  cards={[{
+    icon: "map-pin",
+    title: "Zoning Status",
+    value: "By-right Eligible",
+    description: "R-1-8...",
+    shadowColor: "green"
+  }]}
+/&gt;
+          </div>
+          <p class="text-body-secondary" style="margin-top: 0.5rem;">
+            ✅ 使用样式系统、预设颜色、Lucide 图标、阴影配置
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 使用说明 -->
+    <section class="section">
+      <h2>使用说明</h2>
+      <div class="info-box">
+        <h3>在 MDX 文件中使用</h3>
+        <div class="code-block" style="margin-top: 0;">
+&lt;ModuleCards 
+  cards={[
+    {
+      id: "zoning-status",
+      icon: "map-pin",
+      title: "Zoning Status",
+      value: "By-right Eligible",
+      description: "R-1-8 (no Special Permit Needed)",
+      actionLabel: "view zoning status",
+      iconColor: "accent",
+      shadowColor: "green"
+    },
+    {
+      id: "max-adu-size",
+      icon: "home",
+      title: "Max ADU Size",
+      value: "800 sq ft",
+      description: "2 Bed / 2 Bath Possible",
+      actionLabel: "check design options",
+      iconColor: "accent",
+      shadowColor: "purple"
+    }
+  ]}
+/&gt;
+        </div>
+        <p class="text-body-secondary" style="margin-top: 1rem;">
+          所有组件都已集成到 MDX 系统中，可以直接在报告文件中使用。
+          所有样式都使用预设的样式系统，确保 UI 一致性和美观性。
+          阴影效果通过 <code>shadowColor</code> 属性配置。
+        </p>
+      </div>
+    </section>
+
+    <!-- 样式系统参考 -->
+    <section class="section">
+      <h2>样式系统参考</h2>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div class="card-container" style="padding: 1rem;">
+          <h3 class="text-title">颜色系统</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div style="width: 20px; height: 20px; background: var(--color-report-accent); border-radius: 4px;"></div>
+              <span class="text-body-secondary">accent</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div style="width: 20px; height: 20px; background: var(--color-report-green); border-radius: 4px;"></div>
+              <span class="text-body-secondary">green</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div style="width: 20px; height: 20px; background: var(--color-report-amber); border-radius: 4px;"></div>
+              <span class="text-body-secondary">amber</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div style="width: 20px; height: 20px; background: var(--color-report-purple); border-radius: 4px;"></div>
+              <span class="text-body-secondary">purple</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-container" style="padding: 1rem;">
+          <h3 class="text-title">文本样式</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+            <p class="text-label">Label Text</p>
+            <p class="text-title">Component Title</p>
+            <p class="text-large-number">30px Number</p>
+            <p class="text-body">Body Text</p>
+            <p class="text-body-secondary">Secondary Text</p>
+          </div>
+        </div>
+
+        <div class="card-container" style="padding: 1rem;">
+          <h3 class="text-title">阴影选项</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+            <div class="text-body-secondary">• green</div>
+            <div class="text-body-secondary">• purple</div>
+            <div class="text-body-secondary">• amber</div>
+            <div class="text-body-secondary">• yellow</div>
+            <div class="text-body-secondary">• none (默认)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
